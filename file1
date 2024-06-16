@@ -1,0 +1,6 @@
+
+#!/bin/bash
+read x
+touch 'man_{$x}'
+echo max_{$x}
+
