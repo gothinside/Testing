@@ -34,8 +34,9 @@ booking_service = Table(
     "booking_service",
     Base.metadata,
     Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True),
-    Column("service_id", Integer, ForeignKey("services.id"), primary_key= True)
+    Column("service_id", Integer, ForeignKey("services.service_id"), primary key=True)
 )
+
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -46,6 +47,7 @@ class Booking(Base):
     rooms = relationship("Room", secondary=booking_room, back_populates="bookings")
     payments = relationship("Payment", secondary=booking_payment, back_populates="bookings")
     services = relationship("Service", secondary=booking_service, back_populates="bookings")
+
 class Room(Base):
     __tablename__ = "rooms"
     room_num = Column(Integer, nullable=False, primary_key=True)
@@ -65,21 +67,11 @@ class Payment(Base):
 
 class Service(Base):
     __tablename__ = "services"
-    service_id = Column(Integer, primary_key=True)
+    service_id = Column(Integer, primary_key=True, autoincrement=True)
     service_name = Column(String(2000), nullable=False)
     service_price = Column(Integer)
     is_active = Column(Boolean, nullable=False, default=True)
-
-# Example of the Employee class, uncomment if needed
-# class Employee(Base):
-#     __tablename__ = "employees"
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     first_name = Column(String, nullable=False)
-#     last_name = Column(String, nullable=False)
-#     job_name = Column(String, nullable=False)
-#     hire_date = Column(Date, nullable=False)
-#     email = Column(String, unique=True, nullable=False)
-#     salary = Column(Integer, nullable=False)
+    bookings = relationship("Booking", secondary=booking_service, back_populates="services")
 
 Base.metadata.create_all(engine)
 
@@ -89,9 +81,6 @@ session = SessionLocal()
 # Query example
 x = session.query(Booking.id, Room.room_num).join(Booking.rooms).all()
 print(x)
-
-# Commit the session (not needed for queries, only for inserts/updates)
-session.commit()
 
 # Close the session
 session.close()
