@@ -13,8 +13,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
     hashed_password = Column(String(1000), nullable=False)
-    email = Column(String(1000), unique=True, nullable=False)
-    phon_number = Column(String(30), unique=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    phone_number = Column(String(20), unique=True, nullable=False)
     is_active = Column(Boolean, default=True)
     bookings = relationship("Booking", back_populates="user")
 
@@ -50,14 +50,12 @@ class Room(Base):
     is_wifi = Column(Boolean, default=True, nullable=False)
     bookings = relationship("Booking", secondary=booking_room, back_populates="rooms")
 
-    
 class Payment(Base):
     __tablename__ = "payments"
     id = Column(Integer, primary_key=True, autoincrement=True)
     amount = Column(Integer, nullable=False)
     payment_date = Column(Date, nullable=False)
     bookings = relationship("Booking", secondary=booking_payment, back_populates="payments")
-
 
 class Service(Base):
     __tablename__ = "services"
@@ -66,8 +64,8 @@ class Service(Base):
     service_price = Column(Integer)
     is_active = Column(Boolean, nullable=False, default=True)
 
-
-#class Employee(Base):
+# Example of the Employee class, uncomment if needed
+# class Employee(Base):
 #     __tablename__ = "employees"
 #     id = Column(Integer, primary_key=True, autoincrement=True)
 #     first_name = Column(String, nullable=False)
@@ -83,7 +81,7 @@ Base.metadata.create_all(engine)
 session = SessionLocal()
 
 # Query example
-x = session.query(Booking.id, Room.id).join(Booking.rooms).all()
+x = session.query(Booking.id, Room.room_num).join(Booking.rooms).all()
 print(x)
 
 # Commit the session (not needed for queries, only for inserts/updates)
