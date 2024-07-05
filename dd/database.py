@@ -30,6 +30,12 @@ booking_payment = Table(
     Column("payment_id", Integer, ForeignKey("payments.id"), primary_key=True)
 )
 
+booking_service = Table(
+    "booking_service",
+    Base.metadata,
+    Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True),
+    Column("service_id", Integer, ForeignKey("services.id"), primary_key= True)
+)
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -39,7 +45,7 @@ class Booking(Base):
     user = relationship("User", back_populates="bookings")
     rooms = relationship("Room", secondary=booking_room, back_populates="bookings")
     payments = relationship("Payment", secondary=booking_payment, back_populates="bookings")
-
+    services = relationship("Service", secondary=booking_service, back_populates="bookings")
 class Room(Base):
     __tablename__ = "rooms"
     room_num = Column(Integer, nullable=False, primary_key=True)
