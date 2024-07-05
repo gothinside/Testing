@@ -1,28 +1,24 @@
-from pydantic import BaseModel
-from datetime import date, datetime
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
-class Users(BaseModel):
-    id:int
-    username:str
-    hased_password:str
-    email:str
-    phone:str
-    is_active:bool
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
 
-class Booking(BaseModel):
-    id:int|None
-    join_date: datetime
-    out_date : None | datetime
-    user_id: int
+class UserCreate(UserBase):
+    password: str
 
-class Room(BaseModel):
-    id:int|None
-    room_num: int|None
-    room_cat: str|None
-    room_price: int|None
+class UserUpdate(UserBase):
+    password: Optional[str] = None
 
-class Payment(BaseModel):
-    id:int
-    amount: int
-    payment_date: datetime
-    
+class UserInDBBase(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class User(UserInDBBase):
+    pass
+
+class UserInDB(UserInDBBase):
+    hashed_password: str
