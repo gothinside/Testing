@@ -26,7 +26,7 @@ def get_user(db: Session, user_id: int):
     q = db.query(models.User.username).filter(models.User.id == user_id).one_or_none()
     return q
 
-def get_update(db: Session, user_id: int, user_update: schemas.UserUpdate):
+def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
     user = db.query(models.User).filter(models.User.id == user_id).one_or_none()
     
     if not user:
