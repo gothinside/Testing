@@ -25,3 +25,19 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_user(db: Session, user_id: int):
     q = db.query(models.User.username).filter(models.User.id == user_id).one_or_none()
     return q
+
+def get_update(db: Session, user_id: int, user_update: schemas.UserUpdate):
+    user = db.query(models.User).filter(models.User.id == user_id).one_or_none()
+    
+    if not user:
+        return None  # or raise an appropriate exception
+
+    update_data = user_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        if key == "password":  # If updating the password, hash it first
+            value = hashed_algorithm(value)
+        setattr(user, key, value)
+    
+    db.commit()
+    db.refresh(user)
+    return user
