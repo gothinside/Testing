@@ -62,6 +62,8 @@ class Room(Base):
     __tablename__ = "rooms"
     room_num = Column(Integer, nullable=False, primary_key=True)
     category_id = Column(Integer, ForeignKey("categories.id"))
+    bookings = relationship("Booking", secondary=booking_room, back_populates="rooms")
+    category = relationship("Category", back_populates="rooms")
 
 class Payment(Base):
     __tablename__ = "payments"
