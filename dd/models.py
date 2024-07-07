@@ -10,9 +10,9 @@ client_user = Table(
 )
 
 booking_room = Table(
-    "booking_room", 
+    "booking_room",
     Base.metadata,
-    Column("room_id", Integer, ForeignKey("rooms.room_num"), primary_key=True),
+    Column("room_num", Integer, ForeignKey("rooms.room_num"), primary_key=True),
     Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True)
 )
 
@@ -30,13 +30,6 @@ booking_service = Table(
     Column("service_id", Integer, ForeignKey("services.service_id"), primary_key=True)
 )
 
-room_category = Table(
-    "room_category",
-    Base.metadata,
-    Column("room_id", Integer, ForeignKey("rooms.id"), primary_key=True),
-    Column("category_id", Integer, ForeignKey("categories.id"), primary_key=True)
-)
-
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -51,7 +44,7 @@ class Client(Base):
     first_name = Column(String(2000), nullable=False)
     last_name = Column(String(2000), nullable=False)
     phone_number = Column(String(20), nullable=False)
-    bookings = relationship("Booking", back_populates="clients")
+    bookings = relationship("Booking", back_populates="client")
     users = relationship("User", secondary=client_user, back_populates="clients")
 
 class Booking(Base):
@@ -59,7 +52,7 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     join_date = Column(DateTime, nullable=False)
     out_date = Column(DateTime)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    client_id = Column(Integer, ForeignKey("clients.id"))
     client = relationship("Client", back_populates="bookings")
     rooms = relationship("Room", secondary=booking_room, back_populates="bookings")
     payments = relationship("Payment", secondary=booking_payment, back_populates="bookings")
@@ -68,12 +61,7 @@ class Booking(Base):
 class Room(Base):
     __tablename__ = "rooms"
     room_num = Column(Integer, nullable=False, primary_key=True)
-    room_category = Column(String(50), nullable=False)
-    room_price = Column(Integer, nullable=False)
-    beds = Column(Integer, default=1, nullable=False)
-    is_tv = Column(Boolean, default=True, nullable=False)
-    is_wifi = Column(Boolean, default=True, nullable=False)
-    bookings = relationship("Booking", secondary=booking_room, back_populates="rooms")
+    category_id = Column(Integer, ForeignKey("categories.id"))
 
 class Payment(Base):
     __tablename__ = "payments"
@@ -92,11 +80,11 @@ class Service(Base):
 
 class Category(Base):
     __tablename__ = "categories"
-    id = Column(Integer, primary_key=True, autoincrement= True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     category = Column(String(1000), unique=True, nullable=False)
     price = Column(Integer, nullable=False)
     beds = Column(Integer, default=1, nullable=False)
     tables = Column(Integer, default=1, nullable=False)
     is_tv = Column(Boolean, default=True, nullable=False)
     is_wifi = Column(Boolean, default=True, nullable=False)
-    
+    rooms = relationship("Room", back_populates="category")
