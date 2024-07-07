@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Table, Integer, String, Date, Boolean, ForeignKey, DateTime
-from database import Base
 from sqlalchemy.orm import relationship
+from database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -12,7 +12,9 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     bookings = relationship("Booking", back_populates="user")
 
-booking_room = Table("booking_room", Base.metadata,
+booking_room = Table(
+    "booking_room",
+    Base.metadata,
     Column("room_id", Integer, ForeignKey("rooms.room_num"), primary_key=True),
     Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True)
 )
@@ -31,13 +33,6 @@ booking_service = Table(
     Column("service_id", Integer, ForeignKey("services.service_id"), primary_key=True)
 )
 
-room_category = Table(
-    "room_categorie",
-    Base.metadata,
-    Column("room_id", Integer, ForeignKey("rooms.id"), primary_key=True),
-    Column("category_id", Integer, ForeignKey("categories.id"), primary_key=True)
-)
-
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -51,8 +46,9 @@ class Booking(Base):
 
 class Room(Base):
     __tablename__ = "rooms"
-    room_num = Column(Integer, nullable=False, primary_key=True)
-    room_category = Column(String(50), nullable=False)
+    room_num = Column(Integer, primary_key=True)
+    category_id = Column(Integer, ForeignKey("categories.id"))
+    room_category = relationship("Category", back_populates="rooms")
     room_price = Column(Integer, nullable=False)
     beds = Column(Integer, default=1, nullable=False)
     is_tv = Column(Boolean, default=True, nullable=False)
@@ -76,11 +72,11 @@ class Service(Base):
 
 class Category(Base):
     __tablename__ = "categories"
-    id = Column(Integer, primary_key=True, autoincrement= True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     category = Column(String(1000), unique=True, nullable=False)
     price = Column(Integer, nullable=False)
     beds = Column(Integer, default=1, nullable=False)
     tables = Column(Integer, default=1, nullable=False)
     is_tv = Column(Boolean, default=True, nullable=False)
     is_wifi = Column(Boolean, default=True, nullable=False)
-    
+    rooms = relationship("Room", back_populates="room_category")
