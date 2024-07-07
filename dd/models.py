@@ -2,6 +2,15 @@ from sqlalchemy import Column, Table, Integer, String, Date, Boolean, ForeignKey
 from database import Base
 from sqlalchemy.orm import relationship
 
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, nullable=False)
+    hashed_password = Column(String(1000), nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    phone_number = Column(String(20), unique=True, nullable=False)
+    is_active = Column(Boolean, default=True)
+    bookings = relationship("Booking", back_populates="user")
 
 booking_room = Table("booking_room", Base.metadata,
     Column("room_id", Integer, ForeignKey("rooms.room_num"), primary_key=True),
@@ -22,15 +31,13 @@ booking_service = Table(
     Column("service_id", Integer, ForeignKey("services.service_id"), primary_key=True)
 )
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50), unique=True, nullable=False)
-    hashed_password = Column(String(1000), nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    phone_number = Column(String(20), unique=True, nullable=False)
-    is_active = Column(Boolean, default=True)
-    bookings = relationship("Booking", back_populates="user")
+room_category = Table(
+    "room_categorie",
+    Base.metadata,
+    Column("room_id", Integer, ForeignKey("rooms.id"), primary_key=True),
+    Column("category_id", Integer, ForeignKey("categories.id"), primary_key=True)
+)
+
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -66,3 +73,14 @@ class Service(Base):
     service_price = Column(Integer)
     is_active = Column(Boolean, nullable=False, default=True)
     bookings = relationship("Booking", secondary=booking_service, back_populates="services")
+
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, autoincrement= True)
+    category = Column(String(1000), unique=True, nullable=False)
+    price = Column(Integer, nullable=False)
+    beds = Column(Integer, default=1, nullable=False)
+    tables = Column(Integer, default=1, nullable=False)
+    is_tv = Column(Boolean, default=True, nullable=False)
+    is_wifi = Column(Boolean, default=True, nullable=False)
+    
