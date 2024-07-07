@@ -69,7 +69,7 @@ class Service(Base):
 class Category(Base):
     __tablename__ = "categories"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    category = Column(String(1000), unique=True, nullable=False)
+    category_name = Column(String(1000), unique=True, nullable=False)
     price = Column(Integer, nullable=False)
     beds = Column(Integer, default=1, nullable=False)
     tables = Column(Integer, default=1, nullable=False)
