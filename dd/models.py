@@ -49,10 +49,6 @@ class Room(Base):
     room_num = Column(Integer, primary_key=True)
     category_id = Column(Integer, ForeignKey("categories.id"))
     room_category = relationship("Category", back_populates="rooms")
-    room_price = Column(Integer, nullable=False)
-    beds = Column(Integer, default=1, nullable=False)
-    is_tv = Column(Boolean, default=True, nullable=False)
-    is_wifi = Column(Boolean, default=True, nullable=False)
     bookings = relationship("Booking", secondary=booking_room, back_populates="rooms")
 
 class Payment(Base):
