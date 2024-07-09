@@ -1,33 +1,33 @@
 from sqlalchemy import Column, Table, Integer, String, Date, Boolean, ForeignKey, DateTime
-from database import Base
+from .database import Base
 from sqlalchemy.orm import relationship
 
 client_user = Table(
     "client_user",
     Base.metadata,
-    Column("client_id", Integer, ForeignKey("clients.id", nullable=False), primary_key=True),
-    Column("user_id", Integer, ForeignKey("users.id", nullable=False), primary_key=True)
+    Column("client_id", Integer, ForeignKey("clients.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True)
 )
 
 booking_room = Table(
     "booking_room",
     Base.metadata,
-    Column("room_num", Integer, ForeignKey("rooms.room_num", nullable=False), primary_key=True),
-    Column("booking_id", Integer, ForeignKey("bookings.id", nullable=False), primary_key=True)
+    Column("room_num", Integer, ForeignKey("rooms.room_num"), primary_key=True),
+    Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True)
 )
 
 booking_payment = Table(
     "booking_payment",
     Base.metadata,
-    Column("booking_id", Integer, ForeignKey("bookings.id", nullable=False), primary_key=True),
-    Column("payment_id", Integer, ForeignKey("payments.id", nullable=False), primary_key=True)
+    Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True),
+    Column("payment_id", Integer, ForeignKey("payments.id"), primary_key=True)
 )
 
 booking_service = Table(
     "booking_service",
     Base.metadata,
-    Column("booking_id", Integer, ForeignKey("bookings.id", nullable=False), primary_key=True),
-    Column("service_id", Integer, ForeignKey("services.service_id", nullable=False), primary_key=True)
+    Column("booking_id", Integer, ForeignKey("bookings.id"), primary_key=True),
+    Column("service_id", Integer, ForeignKey("services.service_id"), primary_key=True)
 )
 
 class User(Base):
@@ -52,7 +52,7 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     join_date = Column(DateTime, nullable=False)
     out_date = Column(DateTime, nullable=False)
-    client_id = Column(Integer, ForeignKey("clients.id", nullable=False))
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     client = relationship("Client", back_populates="bookings")
     rooms = relationship("Room", secondary=booking_room, back_populates="bookings")
     payments = relationship("Payment", secondary=booking_payment, back_populates="bookings")
@@ -61,7 +61,7 @@ class Booking(Base):
 class Room(Base):
     __tablename__ = "rooms"
     room_num = Column(Integer, nullable=False, primary_key=True)
-    category_id = Column(Integer, ForeignKey("categories.id", nullable=False))
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     bookings = relationship("Booking", secondary=booking_room, back_populates="rooms")
     category = relationship("Category", back_populates="rooms")
 
