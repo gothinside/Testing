@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Table, Integer, String, Date, Bool
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 engine = create_engine(
-    "postgresql+psycopg2://postgres:123@localhost/myproject",
+    "postgresql+psycopg2://postgres:123@localhost/hotel_db",
     echo=True
 )
 Base = declarative_base()
