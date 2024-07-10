@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from .. import crud, schemas
+from fastapi import APIRouter, Depends
+from . import crud
 from ..database import SessionLocal, engine
+from sqlalchemy.orm import Session
 from ..models import Base
-
+from ..schemas import  CategoryCreate,  CategoryUpdate
 def get_db():
     db = SessionLocal()
     try:
@@ -12,24 +12,27 @@ def get_db():
         db.close()
 
 router = APIRouter(
-    prefix="/rooms",
-    tags=["rooms"]
+    prefix="/categories",
+    tags=["categories"]
 )
 
 Base.metadata.create_all(engine)
+session = SessionLocal()
 
 @router.get("/")
-async def read_rooms(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.get_rooms(db, skip, limit)
+async def read_items(skip: int = 0, limit: int = 100, session:Session =  Depends(get_db)):
+    return crud.get_categories(session, skip, limit)
 
 @router.post("/")
-async def create_room(room: schemas.RoomCreate, db: Session = Depends(get_db)):
-    return crud.create_room(db, room)
+async def new_service(category: CategoryCreate, session:Session =  Depends(get_db)):
+    return crud.create_category(session, category)
 
-@router.patch("/{room_num}")
-async def update_room(room_num: int, updated_room: schemas.RoomUpdate, db: Session = Depends(get_db)):
-    return crud.update_room(db, room_num, updated_room)
+@router.patch("/{category_id}")
+async def patch_category(category_id, 
+                         patch_category: CategoryUpdate,
+                        session: Session = Depends(get_db)):
+    return crud.update_category(session, category_id, patch_category)
 
-@router.delete("/{room_num}")
-async def delete_room(room_num: int, db: Session = Depends(get_db)):
-    return crud.delete_room(db, room_num)
+@router.delete("/{category_id}")
+async def delete_category(category_id, session: Session = Depends(get_db)):
+    return crud.delete_category(session, category_id)
