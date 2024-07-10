@@ -75,7 +75,7 @@ class Payment(Base):
 class Service(Base):
     __tablename__ = "services"
     service_id = Column(Integer, primary_key=True, autoincrement=True)
-    service_name = Column(String(255), nullable=False, index = True)
+    service_name = Column(String(255), unique=True, nullable=False, index = True)
     service_price = Column(Integer)
     is_active = Column(Boolean, nullable=False, default=True)
     bookings = relationship("Booking", secondary=booking_service, back_populates="services")
