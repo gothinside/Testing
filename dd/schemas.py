@@ -10,9 +10,9 @@ class UserCreate(UserBase):
     hashed_password: str
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr]
-    is_active: Optional[bool]
-    hashed_password: Optional[str]
+    email: Optional[EmailStr] = None
+    is_active: Optional[bool] = None
+    hashed_password: Optional[str] = None
 
 class User(UserBase):
     id: int
@@ -30,9 +30,9 @@ class ClientCreate(ClientBase):
     pass
 
 class ClientUpdate(BaseModel):
-    first_name: Optional[str]
-    last_name: Optional[str]
-    phone_number: Optional[str]
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
 
 class Client(ClientBase):
     id: int
@@ -50,9 +50,9 @@ class BookingCreate(BookingBase):
     client_id: int
 
 class BookingUpdate(BaseModel):
-    join_date: Optional[datetime]
-    out_date: Optional[datetime]
-    client_id: Optional[int]
+    join_date: Optional[datetime] = None
+    out_date: Optional[datetime] = None
+    client_id: Optional[int] = None
 
 class Booking(BookingBase):
     id: int
@@ -72,8 +72,8 @@ class RoomCreate(RoomBase):
     pass
 
 class RoomUpdate(BaseModel):
-    room_num: Optional[int]
-    category_id: Optional[int]
+    room_num: Optional[int] = None
+    category_id: Optional[int] = None
 
 class Room(RoomBase):
     bookings: List[Booking] = []
@@ -90,8 +90,8 @@ class PaymentCreate(PaymentBase):
     pass
 
 class PaymentUpdate(BaseModel):
-    amount: Optional[int]
-    payment_date: Optional[date]
+    amount: Optional[int] = None
+    payment_date: Optional[date] = None
 
 class Payment(PaymentBase):
     id: int
@@ -109,10 +109,10 @@ class ServiceCreate(ServiceBase):
     pass
 
 class ServiceUpdate(BaseModel):
-    service_name: Optional[str]
-    service_price: Optional[int]
-    is_active: Optional[bool]
-
+    service_name: Optional[str] = None
+    service_price: Optional[int] = None
+    is_active: Optional[bool] = None
+ 
 class Service(ServiceBase):
     service_id: int
     bookings: List[Booking] = []
@@ -121,7 +121,7 @@ class Service(ServiceBase):
         orm_mode = True
 
 class CategoryBase(BaseModel):
-    category: str
+    category_name: str
     price: int
     beds: int = 1
     tables: int = 1
@@ -132,12 +132,12 @@ class CategoryCreate(CategoryBase):
     pass
 
 class CategoryUpdate(BaseModel):
-    category: Optional[str]
-    price: Optional[int]
-    beds: Optional[int]
-    tables: Optional[int]
-    is_tv: Optional[bool]
-    is_wifi: Optional[bool]
+    category_name: Optional[str] = None
+    price: Optional[int] = None
+    beds: Optional[int] = None
+    tables: Optional[int] = None
+    is_tv: Optional[bool] =  None
+    is_wifi: Optional[bool] = None
 
 class Category(CategoryBase):
     id: int
