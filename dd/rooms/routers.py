@@ -1,15 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import crud, schemas
+from .. import schemas
 from ..database import SessionLocal, engine
 from ..models import Base
+from . import crud
+from ..dependies import get_db
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 router = APIRouter(
     prefix="/rooms",
