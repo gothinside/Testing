@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Table, Integer, String, Date, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Table, Integer, String, Date, Boolean, ForeignKey, DateTime, TIMESTAMP
 from .database import Base
 from sqlalchemy.orm import relationship
+from sqlalchemy import func
 
 client_user = Table(
     "client_user",
@@ -50,8 +51,8 @@ class Client(Base):
 class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    join_date = Column(DateTime, nullable=False)
-    out_date = Column(DateTime, nullable=False)
+    join_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    out_date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     client = relationship("Client", back_populates="bookings")
     rooms = relationship("Room", secondary=booking_room, back_populates="bookings")
