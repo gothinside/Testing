@@ -1,10 +1,13 @@
-from sqlalchemy import create_engine, Column, Table, Integer, String, Date, Boolean, ForeignKey, DateTime
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
-engine = create_engine(
-    "postgresql+psycopg2://postgres:123@localhost/hotel_db",
+engine = create_async_engine(
+    "postgresql+asyncpg://postgres:123@localhost/hotel_db",
     echo=True
 )
+
 Base = declarative_base()
-SessionLocal = sessionmaker(bind=engine)
+
+SessionLocal = sessionmaker(bind=engine, expire_on_commit=True, class_= AsyncSession)
 
