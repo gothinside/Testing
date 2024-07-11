@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from .. import models, schemas
+from sqlalchemy import select
 
 async def get_categories(db: AsyncSession, skip: int = 0, limit: int = 100):
     result = await db.execute(
