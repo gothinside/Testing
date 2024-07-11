@@ -71,4 +71,6 @@ async def delete_category(db: AsyncSession, category_id: int):
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+    
+    return {"message": "Category deleted successfully"}
