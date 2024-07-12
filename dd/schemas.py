@@ -7,7 +7,7 @@ class UserBase(BaseModel):
     is_active: bool = True
 
 class UserCreate(UserBase):
-    hashed_password: str
+    password: str
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None

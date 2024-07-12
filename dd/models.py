@@ -1,7 +1,15 @@
 from sqlalchemy import Column, Table, Integer, String, Date, Boolean, ForeignKey, DateTime, TIMESTAMP
-from .database import Base
+from database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy import func
+
+
+user_role = Table(
+    "user_role",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("role_id", Integer, ForeignKey("roles.id"), primary_key=True)
+)
 
 client_user = Table(
     "client_user",
@@ -91,3 +99,8 @@ class Category(Base):
     is_tv = Column(Boolean, default=True, nullable=False)
     is_wifi = Column(Boolean, default=True, nullable=False)
     rooms = relationship("Room", back_populates="category")
+
+class Role(Base):
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    role_name = Column(String, unique=True, nullable=False)
