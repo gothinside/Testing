@@ -2,8 +2,9 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from .. import models, schemas
 from sqlalchemy.exc import IntegrityError
-def get_rooms(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Room).offset(skip).limit(limit).all()
+async def get_rooms(db: Session, skip: int = 0, limit: int = 100):
+    async with db.begin():
+        return await db.query(models.Room).offset(skip).limit(limit).all()
 
 def create_room(db: Session, room: schemas.RoomCreate):
     if not db.query(models.Category).filter(models.Category.id == room.category_id).one_or_none():
@@ -30,11 +31,12 @@ def update_room(db: Session, room_num: int, updated_room: schemas.RoomUpdate):
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
     
+    if not db.query(models.Category).filter(models.Category.id == updated_room.category_id).one_or_none():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    
     if (not db.query(models.Room).filter(models.Room.room_num == updated_room.room_num).one_or_none()) and room_num != updated_room.room_num:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This room number already exists")
     
-    if not db.query(models.Category).filter(models.Category.id == updated_room.category_id).one_or_none():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     
     update_data = updated_room.model_dump(exclude_unset=True)
     for key, value in update_data.items():

@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from ..models import User, user_role, Role
 from ..schemas import UserCreate
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from ..auth import Hasher
 from ..admin import ROLES
 
