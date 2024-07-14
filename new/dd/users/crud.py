@@ -8,42 +8,48 @@ from ..auth import Hasher
 from ..admin import ROLES
 from uuid import uuid4
 
-# Исправленная функция получения пользователя по email
-async def get_user_by_email(db: AsyncSession, email: str) :
-    user = await db.execute(
+# Function to get a user by email
+async def get_user_by_email(db: AsyncSession, email: str):
+    result = await db.execute(
         select(User).where(User.email == email)
     )
+    user = result.scalars().one_or_none()
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
     return user
 
-# async def add_new_user_role(db: AsyncSession, user_id: int):
-#     await db.commit()
-
-# Исправленная функция создания пользователя
+# Function to create a new user
 async def create_user(db: AsyncSession, user: UserCreate):
-    #if (await get_user_by_email(db, user.email).scalar_one_or_)
+    existing_user = await get_user_by_email(db, user.email)
+    if existing_user:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already exists")
+    
     new_user = User(
         email=user.email,
         hashed_password=Hasher.get_password_hash(user.password),
         is_active=True
     )
 
-    # Получение ID роли
-    role= await db.execute(
-         select(Role).where(Role.role_name == ROLES.ROLE_USER)
-     )
-    role_id = role.scalars().one_or_none().id
-    # Добавление пользователя в БД
+    # Add new user to the session and commit to get the user ID
     db.add(new_user)
-    await db.flush()              
+    await db.commit()              
     await db.refresh(new_user)
-    await db.execute(
-    user_role.insert(), [{"user_id": new_user.id, "role_id": 1}]
-        )
+
+    # Get the ID of the role
+    result = await db.execute(
+        select(Role).where(Role.role_name == ROLES.ROLE_USER)
+    )
+    role = result.scalars().one_or_none()
+    if not role:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Role not found")
     
-    # except IntegrityError:
-    #     await db.rollback()
-    #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+    role_id = role.id
+
+    # Insert the user role into user_role table
+    await db.execute(
+        user_role.insert().values(user_id=new_user.id, role_id=role_id)
+    )
+    
+    await db.commit()  # Commit the transaction
 
     return new_user
