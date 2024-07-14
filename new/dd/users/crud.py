@@ -6,6 +6,7 @@ from ..schemas import UserCreate
 from sqlalchemy import select, insert
 from ..auth import Hasher
 from ..admin import ROLES
+from uuid import uuid4
 
 # Исправленная функция получения пользователя по email
 async def get_user_by_email(db: AsyncSession, email: str) :
@@ -16,11 +17,8 @@ async def get_user_by_email(db: AsyncSession, email: str) :
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
     return user
 
-async def add_new_user_role(db: AsyncSession, user_id: int):
-    await db.execute(
-    user_role.insert(), [{"user_id": user_id, "role_id": 1}]
-        )
-    await db.commit()
+# async def add_new_user_role(db: AsyncSession, user_id: int):
+#     await db.commit()
 
 # Исправленная функция создания пользователя
 async def create_user(db: AsyncSession, user: UserCreate):
@@ -40,6 +38,9 @@ async def create_user(db: AsyncSession, user: UserCreate):
     db.add(new_user)
     await db.flush()              
     await db.refresh(new_user)
+    await db.execute(
+    user_role.insert(), [{"user_id": new_user.id, "role_id": 1}]
+        )
     
     # except IntegrityError:
     #     await db.rollback()
