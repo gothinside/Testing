@@ -28,3 +28,5 @@ async def async_client():
         yield client
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
+
+RuntimeError: Task <Task pending name='Task-3' coro=<test_dublicate_create_user() running at /home/ubuntu/new/tests/test_create.py:12> cb=[_run_until_complete_cb() at /usr/lib/python3.10/asyncio/base_events.py:184]> got Future <Future pending cb=[Protocol._on_waiter_completed()]> attached to a different loop
