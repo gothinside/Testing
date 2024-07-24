@@ -1,1 +1,114 @@
-{'type': 'get_attribute_error', 'loc': ('response', 'is_active'), 'msg': "Error extracting attribute: MissingGreenlet: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)", 'input': <dd.models.User object at 0x76dd5fc08d90>, 'ctx': {'error': "MissingGreenlet: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)"}}
+conftest.py
+import pytest
+
+from main import app
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from dd.database import get_db, Base
+from fastapi.testclient import TestClient
+from httpx import AsyncClient
+import asyncio
+import asyncpg
+from sqlalchemy import text
+from dd.auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from datetime import timedelta
+from dd.schemas import UserCreate
+from dd.users.crud import create_user
+
+@pytest.fixture(scope='session')
+def event_loop(request):
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+engine = create_async_engine(
+    "postgresql+asyncpg://postgres:123@localhost/test_hotel_db",
+    echo=True,
+    future = True
+)
+
+TestSessionLocal = sessionmaker(bind=engine, expire_on_commit=True, class_= AsyncSession)
+
+async def override_get_async_session():
+    async with TestSessionLocal() as session:
+        yield session
+
+# @pytest.fixture(autouse=True, scope='session')
+# async def prepare_database():
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.create_all)
+#     yield
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.drop_all)
+
+@pytest.fixture(scope="function", autouse=True)
+async def clean_tables():
+    """Clean data in all tables before running test function"""
+    async with TestSessionLocal() as session:
+        async with session.begin():
+            for table_for_cleaning in ["user_role", "users", "roles"]:
+                await session.execute(text(f"""Delete from {table_for_cleaning} cascade;"""))
+# SETUP
+
+@pytest.fixture(scope="session")
+async def client() :
+    app.dependency_overrides[get_db] = override_get_async_session
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        yield client
+
+@pytest.fixture(scope="function")
+async def asyncpg_pool():
+    pool = await asyncpg.create_pool(
+        "".join("postgresql+asyncpg://postgres:123@localhost/test_hotel_db".split("+asyncpg"))
+    )
+    yield pool
+    pool.close()
+
+
+@pytest.fixture
+async def create_user_role(asyncpg_pool):
+        async with asyncpg_pool.acquire() as connection:
+            return await connection.fetch(
+                """INSERT INTO roles values (1, 'ROLE_USER');"""
+            )
+@pytest.fixture
+async def create_new_role():
+    async with TestSessionLocal() as session:
+                async with session.begin():
+                    await session.execute(
+                        text("""INSERT INTO roles values (1, 'ROLE_USER');""")
+                    )
+                    await session.commit()
+
+
+
+async def create_new_user():
+     async with TestSessionLocal() as session:
+                    new_user = UserCreate(
+                         email = "1@m.ru",
+                         is_active = True,
+                         password = "12345"
+                    )
+                    user = await create_user(session, new_user)
+                    return user
+
+
+def create_test_auth_headers_for_user(email: str) -> dict[str, str]:
+    access_token = create_access_token(
+        data={"sub": email, "other_custom_data": [1, 2, 3, 4]},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return {"Authorization": f"Bearer {access_token}"}
+
+test_delete.py
+import pytest
+import json
+import httpx
+from conftest import create_test_auth_headers_for_user, create_new_user
+
+async def test_smth(client, create_new_role, event_loop):
+    user = await create_new_user()
+    res = await client.delete("users/{user.id}", headers = create_test_auth_headers_for_user(user.email))
+    assert res.status_code == 200
+
