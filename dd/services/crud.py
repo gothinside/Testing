@@ -1,37 +1,40 @@
-from sqlalchemy.orm import Session
-from .. import models, schemas
-from passlib.context import CryptContext
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from fastapi import HTTPException
+from .. import models, schemas
 
-def get_services(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Service).offset(skip).limit(limit).all()
+async def get_services(db: AsyncSession, skip: int = 0, limit: int = 100):
+    result = await db.execute(select(models.Service).offset(skip).limit(limit))
+    return result.scalars().all()
 
-def create_service(db: Session, service: schemas.ServiceCreate):
-    service = models.Service(**service.model_dump())
-    db.add(service)
-    db.commit()
-    db.refresh(service)
-    return service
+async def create_service(db: AsyncSession, service: schemas.ServiceCreate):
+    new_service = models.Service(**service.model_dump())
+    db.add(new_service)
+    await db.commit()
+    await db.refresh(new_service)
+    return new_service
 
-def update_service(db: Session, service_id:int, updated_service: schemas.ServiceUpdate):
-    service = db.query(models.Service).filter(models.Service.service_id == service_id).one_or_none()
+async def update_service(db: AsyncSession, service_id: int, updated_service: schemas.ServiceUpdate):
+    result = await db.execute(select(models.Service).filter(models.Service.service_id == service_id))
+    service = result.scalars().one_or_none()
     
     if not service:
-        raise HTTPException(404, "Service not found") 
+        raise HTTPException(status_code=404, detail="Service not found")
 
     update_data = updated_service.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(service, key, value)
     
-    db.commit()
-    db.refresh(service)
+    await db.commit()
+    await db.refresh(service)
     return service
 
-def delete_service(db:Session, service_id):
-    service = db.query(models.Service).filter(models.Service.service_id == service_id).one_or_none()
+async def delete_service(db: AsyncSession, service_id: int):
+    result = await db.execute(select(models.Service).filter(models.Service.service_id == service_id))
+    service = result.scalars().one_or_none()
     
     if not service:
-        raise HTTPException(404, "Service not found") # or raise an appropriate exception
-    
-    db.delete(service)
-    db.commit()
+        raise HTTPException(status_code=404, detail="Service not found")
+
+    await db.delete(service)
+    await db.commit()
